@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>StreamGrab • Multi Platform UI</title>
+
+  <!-- FONT -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg-gradient: radial-gradient(circle at 0% 0%, #3b82f6 0, transparent 55%),
+                      radial-gradient(circle at 100% 100%, #ec4899 0, transparent 55%),
+                      linear-gradient(135deg, #020617, #020617);
+      --glass-bg: rgba(15, 23, 42, 0.78);
+      --glass-border: rgba(148, 163, 184, 0.45);
+      --primary: #6366f1;
+      --accent: #f97316;
+      --text-main: #e5e7eb;
+      --text-muted: #9ca3af;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Poppins", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-gradient);
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .bg-overlay {
+      position: fixed;
+      inset: 0;
+      background-image:
+        radial-gradient(circle at 10% 20%, rgba(251, 191, 36, 0.09) 0, transparent 50%),
+        radial-gradient(circle at 90% 80%, rgba(56, 189, 248, 0.12) 0, transparent 50%);
+      mix-blend-mode: screen;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    /* NAV */
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.25rem 6vw;
+      backdrop-filter: blur(18px);
+      background: linear-gradient(to bottom, rgba(15, 23, 42, 0.9), transparent);
+    }
+
+    .nav-logo {
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-size: 0.9rem;
+    }
+
+    .nav-logo span { color: var(--accent); }
+
+    .nav-links {
+      display: flex;
+      gap: 1.25rem;
+      font-size: 0.85rem;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      color: var(--text-muted);
+      padding-block: 0.25rem;
+      position: relative;
+      transition: color 0.2s ease;
+    }
+
+    .nav-links a::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: -0.15rem;
+      width: 0;
+      height: 2px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #6366f1, #ec4899);
+      transition: width 0.2s ease;
+    }
+
+    .nav-links a:hover { color: #e5e7eb; }
+    .nav-links a:hover::after { width: 100%; }
+
+    /* LAYOUT */
+    .hero {
+      flex: 1;
+      padding: 3.5rem 6vw 3rem;
+      max-width: 1080px;
+      margin: 0 auto;
+      display: grid;
+      gap: 2rem;
+    }
+
+    .glass {
+      background: var(--glass-bg);
+      border-radius: 1.5rem;
+      border: 1px solid var(--glass-border);
+      box-shadow:
+        0 10px 40px rgba(15, 23, 42, 0.85),
+        0 0 0 1px rgba(15, 23, 42, 0.9);
+      padding: 1.75rem 1.75rem 1.9rem;
+      backdrop-filter: blur(22px);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.15rem 0.7rem;
+      border-radius: 999px;
+      font-size: 0.68rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      background: rgba(22, 163, 74, 0.09);
+      color: #bbf7d0;
+      border: 1px solid rgba(74, 222, 128, 0.4);
+      margin-bottom: 1rem;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.8rem, 2.5vw, 2.3rem);
+    }
+
+    .subtitle {
+      margin-top: 0.75rem;
+      margin-bottom: 1.4rem;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    /* FORM */
+    .download-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin-top: 0.5rem;
+    }
+
+    .label {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--text-muted);
+    }
+
+    .input-group {
+      display: flex;
+      align-items: stretch;
+      background: rgba(15, 23, 42, 0.9);
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.7);
+      overflow: hidden;
+      box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.9);
+    }
+
+    .input-prefix {
+      padding: 0.8rem 0.9rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      border-right: 1px solid rgba(55, 65, 81, 0.9);
+      background: radial-gradient(circle at 0 0, rgba(248, 250, 252, 0.06), transparent 55%);
+    }
+
+    #url-input {
+      flex: 1;
+      padding: 0.8rem 1rem;
+      border: none;
+      outline: none;
+      background: transparent;
+      color: var(--text-main);
+      font-size: 0.9rem;
+    }
+
+    #url-input::placeholder {
+      color: rgba(148, 163, 184, 0.7);
+    }
+
+    .platform-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .platform-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.55rem;
+    }
+
+    .platform-pill { cursor: pointer; }
+    .platform-pill input { display: none; }
+
+    .pill-content {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.45rem 0.85rem;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.65);
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      background: radial-gradient(circle at 0 0, rgba(248, 250, 252, 0.028), transparent 60%);
+      transition: all 0.18s ease;
+    }
+
+    .pill-icon {
+      width: 1.35rem;
+      height: 1.35rem;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      color: #020617;
+      font-weight: 600;
+    }
+
+    .pill-icon.fb { background: #3b82f6; }
+    .pill-icon.ig {
+      background: radial-gradient(circle at 30% 30%, #fde68a, #ec4899 40%, #6366f1 80%);
+      color: #f9fafb;
+    }
+    .pill-icon.yt { background: #ef4444; }
+    .pill-icon.tt {
+      background: linear-gradient(135deg, #06b6d4, #ec4899);
+      color: #f9fafb;
+    }
+
+    .platform-pill input:checked + .pill-content {
+      border-color: rgba(129, 140, 248, 0.9);
+      color: #e5e7eb;
+      background:
+        linear-gradient(120deg, rgba(99, 102, 241, 0.18), transparent 55%),
+        radial-gradient(circle at 120% 0, rgba(236, 72, 153, 0.3), transparent 50%);
+      box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.4),
+                  0 8px 25px rgba(15, 23, 42, 0.9);
+    }
+
+    .primary-btn {
+      margin-top: 0.3rem;
+      padding: 0.8rem 1.3rem;
+      border-radius: 999px;
+      border: none;
+      outline: none;
+      cursor: pointer;
+      background: linear-gradient(135deg, #6366f1, #ec4899);
+      color: white;
+      font-size: 0.9rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      box-shadow:
+        0 15px 35px rgba(79, 70, 229, 0.65),
+        0 0 0 1px rgba(15, 23, 42, 1);
+      transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease;
+    }
+
+    .primary-btn:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.05);
+      box-shadow:
+        0 20px 40px rgba(79, 70, 229, 0.8),
+        0 0 0 1px rgba(15, 23, 42, 1);
+    }
+
+    .primary-btn:active {
+      transform: translateY(0);
+      box-shadow:
+        0 8px 15px rgba(79, 70, 229, 0.7),
+        0 0 0 1px rgba(15, 23, 42, 1);
+    }
+
+    /* RESULT */
+    .result-box {
+      margin-top: 1.3rem;
+      padding: 1.1rem 1rem 0.9rem;
+      border-radius: 1.1rem;
+      border: 1px dashed rgba(148, 163, 184, 0.7);
+      background: radial-gradient(circle at 0 0, rgba(22, 163, 74, 0.16), transparent 55%),
+                  rgba(15, 23, 42, 0.92);
+    }
+
+    .result-box.hidden { display: none; }
+
+    .result-title {
+      margin: 0 0 0.4rem;
+      font-size: 0.95rem;
+    }
+
+    .result-message {
+      margin: 0 0 0.7rem;
+      font-size: 0.85rem;
+      color: #e5e7eb;
+    }
+
+    .result-footer {
+      border-top: 1px dashed rgba(75, 85, 99, 0.8);
+      padding-top: 0.5rem;
+      margin-top: 0.3rem;
+    }
+
+    .result-footer small {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+
+    .result-box.state-error {
+      border-color: rgba(248, 113, 113, 0.9);
+      background:
+        radial-gradient(circle at 0 0, rgba(248, 113, 113, 0.25), transparent 55%),
+        rgba(15, 23, 42, 0.95);
+    }
+
+    .result-box.state-success {
+      border-color: rgba(74, 222, 128, 0.9);
+    }
+
+    .result-box.state-warning {
+      border-color: rgba(251, 191, 36, 0.9);
+    }
+
+    .result-box.state-info {
+      border-color: rgba(129, 140, 248, 0.9);
+    }
+
+    /* INFO + FOOTER */
+    .info-section {
+      margin-top: 0.75rem;
+    }
+
+    .info-section h2 {
+      margin-top: 0;
+      font-size: 1rem;
+    }
+
+    .info-section.warning {
+      border-color: rgba(248, 113, 113, 0.7);
+      background:
+        radial-gradient(circle at 0 0, rgba(248, 113, 113, 0.22), transparent 55%),
+        var(--glass-bg);
+    }
+
+    .info-section.warning p {
+      font-size: 0.8rem;
+      color: #fecaca;
+    }
+
+    .steps {
+      margin: 0.4rem 0 0;
+      padding-left: 1.1rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .steps li + li { margin-top: 0.2rem; }
+
+    .footer {
+      padding: 1.2rem 6vw 1.4rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    @media (max-width: 768px) {
+      .nav { padding-inline: 5vw; }
+      .nav-links { display: none; }
+      .hero { padding: 2.5rem 5vw 2.5rem; }
+      .glass { padding: 1.4rem 1.3rem 1.5rem; border-radius: 1.2rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-overlay"></div>
+
+  <header class="nav">
+    <div class="nav-logo">Stream<span>Grab</span></div>
+    <nav class="nav-links">
+      <a href="#home">Beranda</a>
+      <a href="#how-it-works">Konsep</a>
+      <a href="#disclaimer">Disclaimer</a>
+    </nav>
+  </header>
+
+  <main id="home" class="hero">
+    <section class="glass">
+      <div class="badge">BETA • UI ONLY</div>
+      <h1>Multi Platform Auto Downloader</h1>
+      <p class="subtitle">
+        Tampilan modern untuk downloader Facebook, Instagram, YouTube, dan TikTok.
+        Versi ini hanya simulasi front‑end, tanpa fungsi download nyata.
+      </p>
+
+      <form id="download-form" class="download-form">
+        <label for="url-input" class="label">Tempelkan URL konten kamu</label>
+        <div class="input-group">
+          <span class="input-prefix">https://</span>
+          <input
+            type="text"
+            id="url-input"
+            placeholder="contoh: www.youtube.com/watch?v=..."
+            autocomplete="off"
+          />
+        </div>
+
+        <div class="platform-group">
+          <span class="label">Pilih platform</span>
+          <div class="platform-list">
+            <label class="platform-pill">
+              <input type="radio" name="platform" value="facebook" checked />
+              <span class="pill-content">
+                <span class="pill-icon fb">f</span>
+                <span>Facebook</span>
+              </span>
+            </label>
+            <label class="platform-pill">
+              <input type="radio" name="platform" value="instagram" />
+              <span class="pill-content">
+                <span class="pill-icon ig">⌾</span>
+                <span>Instagram</span>
+              </span>
+            </label>
+            <label class="platform-pill">
+              <input type="radio" name="platform" value="youtube" />
+              <span class="pill-content">
+                <span class="pill-icon yt">▶</span>
+                <span>YouTube</span>
+              </span>
+            </label>
+            <label class="platform-pill">
+              <input type="radio" name="platform" value="tiktok" />
+              <span class="pill-content">
+                <span class="pill-icon tt">♪</span>
+                <span>TikTok</span>
+              </span>
+            </label>
+          </div>
+        </div>
+
+        <button type="submit" class="primary-btn">
+          Generate Link Download (Demo)
+        </button>
+      </form>
+
+      <div id="result-box" class="result-box hidden">
+        <h2 class="result-title">Hasil simulasi</h2>
+        <p id="result-message" class="result-message"></p>
+        <div class="result-footer">
+          <small>
+            Template ini hanya mensimulasikan tampilan. Untuk fungsi nyata,
+            kamu perlu backend sendiri dan harus patuh hukum & Terms of Service tiap platform.
+          </small>
+        </div>
+      </div>
+    </section>
+
+    <section id="how-it-works" class="glass info-section">
+      <h2>Konsep alur kerja</h2>
+      <ol class="steps">
+        <li>Pengguna memasukkan URL dan memilih platform.</li>
+        <li>UI mengecek format URL dan menampilkan pesan simulasi.</li>
+        <li>Di versi production, tombol ini biasanya memanggil API backend milikmu.</li>
+      </ol>
+    </section>
+
+    <section id="disclaimer" class="glass info-section warning">
+      <h2>Disclaimer</h2>
+      <p>
+        Website ini <strong>tidak</strong> mengunduh konten dari platform mana pun.
+        Ini hanya antarmuka demo. Mengunduh konten tanpa izin bisa melanggar
+        hak cipta dan aturan layanan resmi.
+      </p>
+      <p>
+        Gunakan template ini untuk belajar UI/UX dan hanya implementasikan fitur
+        yang sesuai hukum di daerahmu.
+      </p>
+    </section>
+  </main>
+
+  <footer class="footer">
+    © 2025 StreamGrab UI Template • Front‑end only
+  </footer>
+
+  <script>
+    const form = document.getElementById("download-form");
+    const urlInput = document.getElementById("url-input");
+    const resultBox = document.getElementById("result-box");
+    const resultMessage = document.getElementById("result-message");
+
+    function detectPlatform(url) {
+      const v = url.toLowerCase();
+      if (v.includes("youtube.com") || v.includes("youtu.be")) return "youtube";
+      if (v.includes("instagram.com")) return "instagram";
+      if (v.includes("facebook.com") || v.includes("fb.watch")) return "facebook";
+      if (v.includes("tiktok.com")) return "tiktok";
+      return "unknown";
+    }
+
+    function platformLabel(platform) {
+      switch (platform) {
+        case "facebook": return "Facebook";
+        case "instagram": return "Instagram";
+        case "youtube": return "YouTube";
+        case "tiktok": return "TikTok";
+        default: return "Tidak diketahui";
+      }
+    }
+
+    function escapeHtml(unsafe) {
+      return unsafe
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function showResult(message, type = "info", isHtml = false) {
+      resultBox.classList.remove("hidden");
+      resultBox.classList.remove("state-error", "state-success", "state-warning", "state-info");
+      resultBox.classList.add("state-" + type);
+      if (isHtml) {
+        resultMessage.innerHTML = message;
+      } else {
+        resultMessage.textContent = message;
+      }
+    }
+
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      const rawUrl = urlInput.value.trim();
+      const chosen = document.querySelector('input[name="platform"]:checked');
+
+      if (!rawUrl) {
+        showResult("Mohon masukkan URL terlebih dahulu.", "error");
+        return;
+      }
+
+      const platform = chosen ? chosen.value : null;
+      const detected = detectPlatform(rawUrl);
+
+      if (detected !== "unknown" && platform && detected !== platform) {
+        showResult(
+          "URL terdeteksi sebagai " + detected +
+          ", tapi kamu memilih " + platform + ". Cek lagi URL atau pilih platform yang sesuai.",
+          "warning"
+        );
+        return;
+      }
+
+      showResult("Memproses URL kamu... (simulasi)", "info");
+      setTimeout(function () {
+        const html =
+          "<strong>Sukses (simulasi)!</strong><br/><br/>" +
+          "Seandainya terkoneksi ke backend, di sini biasanya akan muncul data seperti:<br/>" +
+          "<ul>" +
+          "<li>Judul konten</li>" +
+          "<li>Thumbnail</li>" +
+          "<li>Pilihan kualitas & format</li>" +
+          "<li>Tombol mulai download</li>" +
+          "</ul>" +
+          "<strong>URL:</strong> " + escapeHtml(rawUrl) + "<br/>" +
+          "<strong>Platform:</strong> " + platformLabel(platform) + "<br/><br/>" +
+          "Versi ini hanya UI demo tanpa fungsi download nyata.";
+
+        showResult(html, "success", true);
+      }, 800);
+    });
+  </script>
+</body>
+</html>
