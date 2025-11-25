@@ -1,587 +1,325 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>StreamGrab • Multi Platform UI</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>xxid.py - Social Media Downloader</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-  <!-- FONT -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
 
-  <style>
-    :root {
-      --bg-gradient: radial-gradient(circle at 0% 0%, #3b82f6 0, transparent 55%),
-                      radial-gradient(circle at 100% 100%, #ec4899 0, transparent 55%),
-                      linear-gradient(135deg, #020617, #020617);
-      --glass-bg: rgba(15, 23, 42, 0.78);
-      --glass-border: rgba(148, 163, 184, 0.45);
-      --primary: #6366f1;
-      --accent: #f97316;
-      --text-main: #e5e7eb;
-      --text-muted: #9ca3af;
-    }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
 
-    *, *::before, *::after { box-sizing: border-box; }
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
 
-    body {
-      margin: 0;
-      min-height: 100vh;
-      font-family: "Poppins", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-      background: var(--bg-gradient);
-      color: var(--text-main);
-      display: flex;
-      flex-direction: column;
-    }
+        .logo {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
 
-    .bg-overlay {
-      position: fixed;
-      inset: 0;
-      background-image:
-        radial-gradient(circle at 10% 20%, rgba(251, 191, 36, 0.09) 0, transparent 50%),
-        radial-gradient(circle at 90% 80%, rgba(56, 189, 248, 0.12) 0, transparent 50%);
-      mix-blend-mode: screen;
-      pointer-events: none;
-      z-index: -1;
-    }
+        .brand-name {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-family: 'Courier New', monospace;
+        }
 
-    /* NAV */
-    .nav {
-      position: sticky;
-      top: 0;
-      z-index: 10;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 1.25rem 6vw;
-      backdrop-filter: blur(18px);
-      background: linear-gradient(to bottom, rgba(15, 23, 42, 0.9), transparent);
-    }
+        .tagline {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
 
-    .nav-logo {
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      font-size: 0.9rem;
-    }
+        .main-content {
+            padding: 40px 30px;
+        }
 
-    .nav-logo span { color: var(--accent); }
+        .download-form {
+            margin-bottom: 30px;
+        }
 
-    .nav-links {
-      display: flex;
-      gap: 1.25rem;
-      font-size: 0.85rem;
-    }
+        .url-input {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 50px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
 
-    .nav-links a {
-      text-decoration: none;
-      color: var(--text-muted);
-      padding-block: 0.25rem;
-      position: relative;
-      transition: color 0.2s ease;
-    }
+        .url-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
 
-    .nav-links a::after {
-      content: "";
-      position: absolute;
-      left: 0;
-      bottom: -0.15rem;
-      width: 0;
-      height: 2px;
-      border-radius: 999px;
-      background: linear-gradient(90deg, #6366f1, #ec4899);
-      transition: width 0.2s ease;
-    }
+        .download-btn {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 15px;
+            width: 100%;
+        }
 
-    .nav-links a:hover { color: #e5e7eb; }
-    .nav-links a:hover::after { width: 100%; }
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(231, 76, 60, 0.3);
+        }
 
-    /* LAYOUT */
-    .hero {
-      flex: 1;
-      padding: 3.5rem 6vw 3rem;
-      max-width: 1080px;
-      margin: 0 auto;
-      display: grid;
-      gap: 2rem;
-    }
+        .platforms {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
 
-    .glass {
-      background: var(--glass-bg);
-      border-radius: 1.5rem;
-      border: 1px solid var(--glass-border);
-      box-shadow:
-        0 10px 40px rgba(15, 23, 42, 0.85),
-        0 0 0 1px rgba(15, 23, 42, 0.9);
-      padding: 1.75rem 1.75rem 1.9rem;
-      backdrop-filter: blur(22px);
-    }
+        .platform-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
 
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      padding: 0.15rem 0.7rem;
-      border-radius: 999px;
-      font-size: 0.68rem;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      background: rgba(22, 163, 74, 0.09);
-      color: #bbf7d0;
-      border: 1px solid rgba(74, 222, 128, 0.4);
-      margin-bottom: 1rem;
-    }
+        .platform-card:hover {
+            transform: translateY(-5px);
+            border-color: #3498db;
+        }
 
-    h1 {
-      margin: 0;
-      font-size: clamp(1.8rem, 2.5vw, 2.3rem);
-    }
+        .platform-icon {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
 
-    .subtitle {
-      margin-top: 0.75rem;
-      margin-bottom: 1.4rem;
-      color: var(--text-muted);
-      font-size: 0.95rem;
-    }
+        .youtube { color: #ff0000; }
+        .tiktok { color: #000000; }
+        .instagram { 
+            background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .facebook { color: #1877f2; }
 
-    /* FORM */
-    .download-form {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-      margin-top: 0.5rem;
-    }
+        .instructions {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            margin-top: 30px;
+        }
 
-    .label {
-      font-size: 0.78rem;
-      text-transform: uppercase;
-      letter-spacing: 0.16em;
-      color: var(--text-muted);
-    }
+        .instruction-step {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 10px;
+        }
 
-    .input-group {
-      display: flex;
-      align-items: stretch;
-      background: rgba(15, 23, 42, 0.9);
-      border-radius: 999px;
-      border: 1px solid rgba(148, 163, 184, 0.7);
-      overflow: hidden;
-      box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.9);
-    }
+        .step-number {
+            background: #3498db;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-weight: bold;
+        }
 
-    .input-prefix {
-      padding: 0.8rem 0.9rem;
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      border-right: 1px solid rgba(55, 65, 81, 0.9);
-      background: radial-gradient(circle at 0 0, rgba(248, 250, 252, 0.06), transparent 55%);
-    }
+        .result {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            background: #e8f5e8;
+            border-radius: 10px;
+            border-left: 5px solid #2ecc71;
+        }
 
-    #url-input {
-      flex: 1;
-      padding: 0.8rem 1rem;
-      border: none;
-      outline: none;
-      background: transparent;
-      color: var(--text-main);
-      font-size: 0.9rem;
-    }
+        .footer {
+            text-align: center;
+            padding: 20px;
+            background: #2c3e50;
+            color: white;
+            margin-top: 30px;
+        }
 
-    #url-input::placeholder {
-      color: rgba(148, 163, 184, 0.7);
-    }
-
-    .platform-group {
-      display: flex;
-      flex-direction: column;
-      gap: 0.35rem;
-    }
-
-    .platform-list {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.55rem;
-    }
-
-    .platform-pill { cursor: pointer; }
-    .platform-pill input { display: none; }
-
-    .pill-content {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.45rem;
-      padding: 0.45rem 0.85rem;
-      border-radius: 999px;
-      border: 1px solid rgba(148, 163, 184, 0.65);
-      font-size: 0.78rem;
-      color: var(--text-muted);
-      background: radial-gradient(circle at 0 0, rgba(248, 250, 252, 0.028), transparent 60%);
-      transition: all 0.18s ease;
-    }
-
-    .pill-icon {
-      width: 1.35rem;
-      height: 1.35rem;
-      border-radius: 999px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.7rem;
-      color: #020617;
-      font-weight: 600;
-    }
-
-    .pill-icon.fb { background: #3b82f6; }
-    .pill-icon.ig {
-      background: radial-gradient(circle at 30% 30%, #fde68a, #ec4899 40%, #6366f1 80%);
-      color: #f9fafb;
-    }
-    .pill-icon.yt { background: #ef4444; }
-    .pill-icon.tt {
-      background: linear-gradient(135deg, #06b6d4, #ec4899);
-      color: #f9fafb;
-    }
-
-    .platform-pill input:checked + .pill-content {
-      border-color: rgba(129, 140, 248, 0.9);
-      color: #e5e7eb;
-      background:
-        linear-gradient(120deg, rgba(99, 102, 241, 0.18), transparent 55%),
-        radial-gradient(circle at 120% 0, rgba(236, 72, 153, 0.3), transparent 50%);
-      box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.4),
-                  0 8px 25px rgba(15, 23, 42, 0.9);
-    }
-
-    .primary-btn {
-      margin-top: 0.3rem;
-      padding: 0.8rem 1.3rem;
-      border-radius: 999px;
-      border: none;
-      outline: none;
-      cursor: pointer;
-      background: linear-gradient(135deg, #6366f1, #ec4899);
-      color: white;
-      font-size: 0.9rem;
-      font-weight: 600;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      box-shadow:
-        0 15px 35px rgba(79, 70, 229, 0.65),
-        0 0 0 1px rgba(15, 23, 42, 1);
-      transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease;
-    }
-
-    .primary-btn:hover {
-      transform: translateY(-1px);
-      filter: brightness(1.05);
-      box-shadow:
-        0 20px 40px rgba(79, 70, 229, 0.8),
-        0 0 0 1px rgba(15, 23, 42, 1);
-    }
-
-    .primary-btn:active {
-      transform: translateY(0);
-      box-shadow:
-        0 8px 15px rgba(79, 70, 229, 0.7),
-        0 0 0 1px rgba(15, 23, 42, 1);
-    }
-
-    /* RESULT */
-    .result-box {
-      margin-top: 1.3rem;
-      padding: 1.1rem 1rem 0.9rem;
-      border-radius: 1.1rem;
-      border: 1px dashed rgba(148, 163, 184, 0.7);
-      background: radial-gradient(circle at 0 0, rgba(22, 163, 74, 0.16), transparent 55%),
-                  rgba(15, 23, 42, 0.92);
-    }
-
-    .result-box.hidden { display: none; }
-
-    .result-title {
-      margin: 0 0 0.4rem;
-      font-size: 0.95rem;
-    }
-
-    .result-message {
-      margin: 0 0 0.7rem;
-      font-size: 0.85rem;
-      color: #e5e7eb;
-    }
-
-    .result-footer {
-      border-top: 1px dashed rgba(75, 85, 99, 0.8);
-      padding-top: 0.5rem;
-      margin-top: 0.3rem;
-    }
-
-    .result-footer small {
-      font-size: 0.72rem;
-      color: var(--text-muted);
-    }
-
-    .result-box.state-error {
-      border-color: rgba(248, 113, 113, 0.9);
-      background:
-        radial-gradient(circle at 0 0, rgba(248, 113, 113, 0.25), transparent 55%),
-        rgba(15, 23, 42, 0.95);
-    }
-
-    .result-box.state-success {
-      border-color: rgba(74, 222, 128, 0.9);
-    }
-
-    .result-box.state-warning {
-      border-color: rgba(251, 191, 36, 0.9);
-    }
-
-    .result-box.state-info {
-      border-color: rgba(129, 140, 248, 0.9);
-    }
-
-    /* INFO + FOOTER */
-    .info-section {
-      margin-top: 0.75rem;
-    }
-
-    .info-section h2 {
-      margin-top: 0;
-      font-size: 1rem;
-    }
-
-    .info-section.warning {
-      border-color: rgba(248, 113, 113, 0.7);
-      background:
-        radial-gradient(circle at 0 0, rgba(248, 113, 113, 0.22), transparent 55%),
-        var(--glass-bg);
-    }
-
-    .info-section.warning p {
-      font-size: 0.8rem;
-      color: #fecaca;
-    }
-
-    .steps {
-      margin: 0.4rem 0 0;
-      padding-left: 1.1rem;
-      font-size: 0.85rem;
-      color: var(--text-muted);
-    }
-
-    .steps li + li { margin-top: 0.2rem; }
-
-    .footer {
-      padding: 1.2rem 6vw 1.4rem;
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      text-align: center;
-    }
-
-    @media (max-width: 768px) {
-      .nav { padding-inline: 5vw; }
-      .nav-links { display: none; }
-      .hero { padding: 2.5rem 5vw 2.5rem; }
-      .glass { padding: 1.4rem 1.3rem 1.5rem; border-radius: 1.2rem; }
-    }
-  </style>
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+            
+            .header {
+                padding: 30px 20px;
+            }
+            
+            .brand-name {
+                font-size: 2em;
+            }
+        }
+    </style>
 </head>
 <body>
-  <div class="bg-overlay"></div>
-
-  <header class="nav">
-    <div class="nav-logo">Stream<span>Grab</span></div>
-    <nav class="nav-links">
-      <a href="#home">Beranda</a>
-      <a href="#how-it-works">Konsep</a>
-      <a href="#disclaimer">Disclaimer</a>
-    </nav>
-  </header>
-
-  <main id="home" class="hero">
-    <section class="glass">
-      <div class="badge">BETA • UI ONLY</div>
-      <h1>Multi Platform Auto Downloader</h1>
-      <p class="subtitle">
-        Tampilan modern untuk downloader Facebook, Instagram, YouTube, dan TikTok.
-        Versi ini hanya simulasi front‑end, tanpa fungsi download nyata.
-      </p>
-
-      <form id="download-form" class="download-form">
-        <label for="url-input" class="label">Tempelkan URL konten kamu</label>
-        <div class="input-group">
-          <span class="input-prefix">https://</span>
-          <input
-            type="text"
-            id="url-input"
-            placeholder="contoh: www.youtube.com/watch?v=..."
-            autocomplete="off"
-          />
+    <div class="container">
+        <div class="header">
+            <div class="logo">⬇️</div>
+            <div class="brand-name">xxid.py</div>
+            <div class="tagline">Download Video dari Semua Platform Sosial Media</div>
         </div>
 
-        <div class="platform-group">
-          <span class="label">Pilih platform</span>
-          <div class="platform-list">
-            <label class="platform-pill">
-              <input type="radio" name="platform" value="facebook" checked />
-              <span class="pill-content">
-                <span class="pill-icon fb">f</span>
-                <span>Facebook</span>
-              </span>
-            </label>
-            <label class="platform-pill">
-              <input type="radio" name="platform" value="instagram" />
-              <span class="pill-content">
-                <span class="pill-icon ig">⌾</span>
-                <span>Instagram</span>
-              </span>
-            </label>
-            <label class="platform-pill">
-              <input type="radio" name="platform" value="youtube" />
-              <span class="pill-content">
-                <span class="pill-icon yt">▶</span>
-                <span>YouTube</span>
-              </span>
-            </label>
-            <label class="platform-pill">
-              <input type="radio" name="platform" value="tiktok" />
-              <span class="pill-content">
-                <span class="pill-icon tt">♪</span>
-                <span>TikTok</span>
-              </span>
-            </label>
-          </div>
+        <div class="main-content">
+            <div class="platforms">
+                <div class="platform-card">
+                    <div class="platform-icon youtube"><i class="fab fa-youtube"></i></div>
+                    <div>YouTube</div>
+                </div>
+                <div class="platform-card">
+                    <div class="platform-icon tiktok"><i class="fab fa-tiktok"></i></div>
+                    <div>TikTok</div>
+                </div>
+                <div class="platform-card">
+                    <div class="platform-icon instagram"><i class="fab fa-instagram"></i></div>
+                    <div>Instagram</div>
+                </div>
+                <div class="platform-card">
+                    <div class="platform-icon facebook"><i class="fab fa-facebook"></i></div>
+                    <div>Facebook</div>
+                </div>
+            </div>
+
+            <div class="download-form">
+                <input type="url" class="url-input" placeholder="Tempelkan link video di sini (YouTube, TikTok, Instagram, Facebook)...">
+                <button class="download-btn" onclick="processDownload()">
+                    <i class="fas fa-download"></i> Download Sekarang
+                </button>
+            </div>
+
+            <div id="result" class="result">
+                <!-- Hasil download akan muncul di sini -->
+            </div>
+
+            <div class="instructions">
+                <h3>📋 Cara Menggunakan:</h3>
+                <div class="instruction-step">
+                    <div class="step-number">1</div>
+                    <div>Salin link video dari platform yang didukung</div>
+                </div>
+                <div class="instruction-step">
+                    <div class="step-number">2</div>
+                    <div>Tempelkan link ke dalam kolom di atas</div>
+                </div>
+                <div class="instruction-step">
+                    <div class="step-number">3</div>
+                    <div>Klik tombol download dan tunggu prosesnya</div>
+                </div>
+            </div>
         </div>
 
-        <button type="submit" class="primary-btn">
-          Generate Link Download (Demo)
-        </button>
-      </form>
-
-      <div id="result-box" class="result-box hidden">
-        <h2 class="result-title">Hasil simulasi</h2>
-        <p id="result-message" class="result-message"></p>
-        <div class="result-footer">
-          <small>
-            Template ini hanya mensimulasikan tampilan. Untuk fungsi nyata,
-            kamu perlu backend sendiri dan harus patuh hukum & Terms of Service tiap platform.
-          </small>
+        <div class="footer">
+            <p>&copy; 2024 xxid.py - Social Media Downloader. All rights reserved.</p>
         </div>
-      </div>
-    </section>
+    </div>
 
-    <section id="how-it-works" class="glass info-section">
-      <h2>Konsep alur kerja</h2>
-      <ol class="steps">
-        <li>Pengguna memasukkan URL dan memilih platform.</li>
-        <li>UI mengecek format URL dan menampilkan pesan simulasi.</li>
-        <li>Di versi production, tombol ini biasanya memanggil API backend milikmu.</li>
-      </ol>
-    </section>
+    <script>
+        function processDownload() {
+            const urlInput = document.querySelector('.url-input');
+            const resultDiv = document.getElementById('result');
+            const url = urlInput.value.trim();
+            
+            if (!url) {
+                alert('Silakan masukkan URL video terlebih dahulu!');
+                return;
+            }
 
-    <section id="disclaimer" class="glass info-section warning">
-      <h2>Disclaimer</h2>
-      <p>
-        Website ini <strong>tidak</strong> mengunduh konten dari platform mana pun.
-        Ini hanya antarmuka demo. Mengunduh konten tanpa izin bisa melanggar
-        hak cipta dan aturan layanan resmi.
-      </p>
-      <p>
-        Gunakan template ini untuk belajar UI/UX dan hanya implementasikan fitur
-        yang sesuai hukum di daerahmu.
-      </p>
-    </section>
-  </main>
+            // Validasi URL sederhana
+            if (!isValidUrl(url)) {
+                alert('Format URL tidak valid! Pastikan URL diawali dengan http:// atau https://');
+                return;
+            }
 
-  <footer class="footer">
-    © 2025 StreamGrab UI Template • Front‑end only
-  </footer>
+            // Tampilkan loading
+            resultDiv.innerHTML = `
+                <div style="text-align: center;">
+                    <i class="fas fa-spinner fa-spin" style="font-size: 2em; color: #3498db;"></i>
+                    <p style="margin-top: 10px;">Memproses video... Harap tunggu</p>
+                </div>
+            `;
+            resultDiv.style.display = 'block';
 
-  <script>
-    const form = document.getElementById("download-form");
-    const urlInput = document.getElementById("url-input");
-    const resultBox = document.getElementById("result-box");
-    const resultMessage = document.getElementById("result-message");
+            // Simulasi proses download
+            setTimeout(() => {
+                const platform = detectPlatform(url);
+                resultDiv.innerHTML = `
+                    <h3>✅ Download Siap!</h3>
+                    <p>Video dari ${platform} berhasil diproses.</p>
+                    <p><strong>Note:</strong> Untuk implementasi lengkap, integrasikan dengan API downloader seperti:</p>
+                    <ul>
+                        <li>YouTube Data API</li>
+                        <li>Instagram Basic Display API</li>
+                        <li>Facebook Graph API</li>
+                        <li>TikTok Official API</li>
+                    </ul>
+                    <p style="margin-top: 15px; padding: 10px; background: #d4edda; border-radius: 5px;">
+                        <strong>Demo Mode:</strong> Website ini sudah siap deploy. Untuk fungsi download aktual, 
+                        diperlukan backend server dengan library khusus.
+                    </p>
+                `;
+            }, 2000);
+        }
 
-    function detectPlatform(url) {
-      const v = url.toLowerCase();
-      if (v.includes("youtube.com") || v.includes("youtu.be")) return "youtube";
-      if (v.includes("instagram.com")) return "instagram";
-      if (v.includes("facebook.com") || v.includes("fb.watch")) return "facebook";
-      if (v.includes("tiktok.com")) return "tiktok";
-      return "unknown";
-    }
+        function isValidUrl(string) {
+            try {
+                new URL(string);
+                return true;
+            } catch (_) {
+                return false;
+            }
+        }
 
-    function platformLabel(platform) {
-      switch (platform) {
-        case "facebook": return "Facebook";
-        case "instagram": return "Instagram";
-        case "youtube": return "YouTube";
-        case "tiktok": return "TikTok";
-        default: return "Tidak diketahui";
-      }
-    }
+        function detectPlatform(url) {
+            if (url.includes('youtube.com') || url.includes('youtu.be')) return 'YouTube';
+            if (url.includes('tiktok.com')) return 'TikTok';
+            if (url.includes('instagram.com')) return 'Instagram';
+            if (url.includes('facebook.com')) return 'Facebook';
+            return 'Platform Sosial Media';
+        }
 
-    function escapeHtml(unsafe) {
-      return unsafe
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-    }
-
-    function showResult(message, type = "info", isHtml = false) {
-      resultBox.classList.remove("hidden");
-      resultBox.classList.remove("state-error", "state-success", "state-warning", "state-info");
-      resultBox.classList.add("state-" + type);
-      if (isHtml) {
-        resultMessage.innerHTML = message;
-      } else {
-        resultMessage.textContent = message;
-      }
-    }
-
-    form.addEventListener("submit", function (e) {
-      e.preventDefault();
-      const rawUrl = urlInput.value.trim();
-      const chosen = document.querySelector('input[name="platform"]:checked');
-
-      if (!rawUrl) {
-        showResult("Mohon masukkan URL terlebih dahulu.", "error");
-        return;
-      }
-
-      const platform = chosen ? chosen.value : null;
-      const detected = detectPlatform(rawUrl);
-
-      if (detected !== "unknown" && platform && detected !== platform) {
-        showResult(
-          "URL terdeteksi sebagai " + detected +
-          ", tapi kamu memilih " + platform + ". Cek lagi URL atau pilih platform yang sesuai.",
-          "warning"
-        );
-        return;
-      }
-
-      showResult("Memproses URL kamu... (simulasi)", "info");
-      setTimeout(function () {
-        const html =
-          "<strong>Sukses (simulasi)!</strong><br/><br/>" +
-          "Seandainya terkoneksi ke backend, di sini biasanya akan muncul data seperti:<br/>" +
-          "<ul>" +
-          "<li>Judul konten</li>" +
-          "<li>Thumbnail</li>" +
-          "<li>Pilihan kualitas & format</li>" +
-          "<li>Tombol mulai download</li>" +
-          "</ul>" +
-          "<strong>URL:</strong> " + escapeHtml(rawUrl) + "<br/>" +
-          "<strong>Platform:</strong> " + platformLabel(platform) + "<br/><br/>" +
-          "Versi ini hanya UI demo tanpa fungsi download nyata.";
-
-        showResult(html, "success", true);
-      }, 800);
-    });
-  </script>
+        // Enter key support
+        document.querySelector('.url-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                processDownload();
+            }
+        });
+    </script>
 </body>
 </html>
